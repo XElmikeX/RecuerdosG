@@ -6,5 +6,5 @@ $(window).on('load', function() {
             $('#preloader').addClass('hidden');
             $('.cartaHecha').removeClass('content-hidden').addClass('content-visible');
         }
-    }, 10000); // 10 segundos máximo
+    }, 5000); // 10 segundos máximo
 });
