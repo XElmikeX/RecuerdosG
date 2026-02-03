@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti :D</title>
+    
+    <!-- Incluir jQuery antes de tu script -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <link rel="stylesheet" href="css/decora.css">
+</head>
+<body>
+    <div class="cartaHecha">
+        <div class="video-background">
+            <video autoplay muted loop playsinline id="bgVideo">
+                <source src="imagenes/fondo.webm" type="video/webm">
+            </video>
+            <div class="video-overlay"></div>
+        </div>
+
+        <audio id="galeriaAudio" preload="auto" loop>
+            <source src="imagenes/her.mp3" type="audio/mpeg">
+        </audio>
+
+        <div class="container">
+        
+        <div class="valentines">
+            <div class="envelope"></div>
+            <div class="envelopeTwo"></div>
+            <div class="envelopeThree"></div>
+            <div class="front"></div>
+            <div class="card">
+                <div class="text">
+                        <p>Te tengo un <br>detalle.</p>
+                        <p>Para descubrirlo da<br>click sobre el<br>corazón</p>
+                    </div>
+            </div>
+            <div class="cardTwo"></div>
+            <div class="heart"></div>
+            <div class="marca1"><img src="imagenes/marca3.png" width="110px" height="80px"></div>
+            <div class="marca2"><img src="imagenes/marca4.png" width="120px" height="80px"></div>
+            <div class="mostrar"><a href="#" onclick="return false;"></a></div>
+
+            <div class="boxPrinces"><p><span style="font-size: 1rem;">De</span> <em>Princeso</em></p></div>
+            <div class="boxGigan"><p><span style="font-size: 1rem;">Para:</span> <em>Gigante</em></p></div>
+        </div>
+
+        <div class="shadow"></div>
+        </div>
+
+        <div id="galeria" class="galeria-container">
+            <div class="galeria-header">
+                <h2>Nuestros Recuerdos</h2>
+                <button class="cerrar-galeria">×</button>
+            </div>
+            <div class="galeria-contenido">
+                <div class="galeria-controls">
+                    <button class="control-btn" id="btn-pausar">Detener</button>
+                </div>
+                <div class="galeria-track">
+                    
+                </div>
+            </div>
+        </div>
+
+        <script src="anima.js"></script>
+        <script src="galeria.js"></script>
+    </div>
+</body>
+</html>
