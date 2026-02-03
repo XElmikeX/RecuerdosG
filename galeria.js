@@ -135,6 +135,18 @@ $(document).ready(function() {
     function preCargarImagenes() {
         imagenes.forEach(imagen => {
             const img = new Image();
+            img.onload = function() {
+                // Notificar que una imagen de galería se cargó
+                if (typeof imagenCargada === 'function') {
+                    imagenCargada();
+                }
+            };
+            img.onerror = function() {
+                // También contar como cargada aunque haya error
+                if (typeof imagenCargada === 'function') {
+                    imagenCargada();
+                }
+            };
             img.src = imagen.src;
         });
     }
@@ -437,9 +449,15 @@ $(document).ready(function() {
     function configurarCorazon() { 
         // También el enlace invisible
         $('.mostrar a').on('click', function(e) {
-            console.log('Enlace clickeado');
             e.preventDefault();
             e.stopPropagation();
+            
+            // Verificar que todo esté cargado antes de abrir
+            if (!$('#preloader').hasClass('hidden')) {
+                return false;
+            }
+            
+            console.log('Enlace clickeado');
             abrirGaleria();
             return false;
         });
