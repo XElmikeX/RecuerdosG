@@ -1,7 +1,5 @@
-// Archivo: galeria.js (modificado con funcionalidad táctil)
-// Archivo: galeria.js (ajustado para imágenes horizontales)
 $(document).ready(function() {
-    // Datos de las imágenes con sus títulos
+
     const imagenes = [
         { src: 'recuerdos/1.jpeg'},
         { src: 'recuerdos/2.jpeg', titulo: 'Te quedo increible 😄' },
@@ -125,30 +123,7 @@ $(document).ready(function() {
         configurarControles();
         
         // Configurar eventos táctiles
-        configurarEventosTactiles();
-        
-        // Pre-cargar todas las imágenes para mejor rendimiento
-        preCargarImagenes();
-    }
-    
-    // Pre-cargar imágenes para evitar problemas de carga
-    function preCargarImagenes() {
-        imagenes.forEach(imagen => {
-            const img = new Image();
-            img.onload = function() {
-                // Notificar que una imagen de galería se cargó
-                if (typeof imagenCargada === 'function') {
-                    imagenCargada();
-                }
-            };
-            img.onerror = function() {
-                // También contar como cargada aunque haya error
-                if (typeof imagenCargada === 'function') {
-                    imagenCargada();
-                }
-            };
-            img.src = imagen.src;
-        });
+        configurarEventosTactiles();  
     }
     
     // Configurar controles de la galería

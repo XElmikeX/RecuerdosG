@@ -1,5 +1,11 @@
-// Archivo: anima.js (modificado con sistema de precarga)
 $(document).ready(function() {
+
+    window.imagenCargada = function() {
+        imagenesCargadas++;
+        console.log(`✅ Imagen ${imagenesCargadas}/${totalImagenes} cargada`);
+        actualizarProgreso();
+    };
+
     let totalImagenes = 0;
     let imagenesCargadas = 0;
     let audioCargado = false;
@@ -89,6 +95,24 @@ $(document).ready(function() {
         actualizarProgreso();
     }
     
+    function precargarImagenesGaleria() {
+        // Lista de TODAS las imágenes de la galería
+        const imagenesGaleria = [];
+        
+        // Generar rutas del 1 al 40
+        for (let i = 1; i <= 40; i++) {
+            imagenesGaleria.push(`recuerdos/${i}.jpeg`);
+        }
+        
+        // Precargar cada una
+        imagenesGaleria.forEach(src => {
+            const img = new Image();
+            img.onload = imagenCargada;
+            img.onerror = imagenCargada;
+            img.src = src;
+        });
+    }
+
     // Precargar imágenes de la carta
     function precargarImagenesCarta() {
         const imagenesCarta = [
@@ -107,6 +131,7 @@ $(document).ready(function() {
     // Inicializar contador y comenzar precarga
     contarImagenes();
     precargarImagenesCarta();
+    precargarImagenesGaleria();
     
     // Reproducir audio de la galería cuando se abra
     $(document).on('galeriaAbierta', function() {
