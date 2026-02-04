@@ -1,4 +1,4 @@
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
 
     const imagenes = [
         { src: 'recuerdos/1.jpeg'},
@@ -43,9 +43,8 @@ $(document).ready(function() {
         { src: 'recuerdos/40.jpeg', titulo: 'Gracias Gigante' },
     ];
     
-    // Variables de control
     let galeriaActiva = false;
-    let velocidad = 1.5; // Reducida para imágenes más grandes
+    let velocidad = 1.5;
     let velocidadBase = 1.5;
     let pausado = false;
     let posicion = 0;
@@ -64,11 +63,9 @@ $(document).ready(function() {
         return new Promise((resolve) => {
             const img = new Image();
             img.onload = function() {
-                // Si el ancho es mayor que el alto, es horizontal
                 resolve(this.width > this.height);
             };
             img.onerror = function() {
-                // Por defecto asumimos que es horizontal
                 resolve(true);
             };
             img.src = src;
@@ -77,12 +74,11 @@ $(document).ready(function() {
     
     // Inicializar galería
     async function inicializarGaleria() {
-        const galeriaInner = $('<div class="galeria-inner"></div>');
+        const galeriaInner = document.createElement('div');
+        galeriaInner.className = 'galeria-inner';
         
-        // Crear un array para almacenar información de orientación
         const imagenesInfo = [];
         
-        // Cargar cada imagen y determinar su orientación
         for (let i = 0; i < imagenes.length; i++) {
             const imagen = imagenes[i];
             const esHorizontal = await esImagenHorizontal(imagen.src);
@@ -95,58 +91,75 @@ $(document).ready(function() {
         
         // Añadir cada imagen al track
         imagenesInfo.forEach((imagen, index) => {
-            const item = $('<div class="galeria-item"></div>');
-            item.addClass(imagen.clase);
+            const item = document.createElement('div');
+            item.className = `galeria-item ${imagen.clase}`;
             
-            const img = $('<img class="galeria-img">').attr('src', imagen.src).attr('alt', `Recuerdo ${index + 1}`);
-            const titulo = $('<div class="galeria-titulo"></div>').text(imagen.titulo);
+            const img = document.createElement('img');
+            img.className = 'galeria-img';
+            img.src = imagen.src;
+            img.alt = `Recuerdo ${index + 1}`;
             
-            item.append(img, titulo);
-            galeriaInner.append(item);
+            const titulo = document.createElement('div');
+            titulo.className = 'galeria-titulo';
+            titulo.textContent = imagen.titulo || '';
+            
+            item.appendChild(img);
+            if (imagen.titulo) item.appendChild(titulo);
+            galeriaInner.appendChild(item);
         });
         
-        // Duplicar imágenes para crear un efecto de bucle continuo
+        // Duplicar imágenes para bucle
         imagenesInfo.forEach((imagen, index) => {
-            const item = $('<div class="galeria-item"></div>');
-            item.addClass(imagen.clase);
+            const item = document.createElement('div');
+            item.className = `galeria-item ${imagen.clase}`;
             
-            const img = $('<img class="galeria-img">').attr('src', imagen.src).attr('alt', `Recuerdo ${index + 1} (copia)`);
-            const titulo = $('<div class="galeria-titulo"></div>').text(imagen.titulo);
+            const img = document.createElement('img');
+            img.className = 'galeria-img';
+            img.src = imagen.src;
+            img.alt = `Recuerdo ${index + 1} (copia)`;
             
-            item.append(img, titulo);
-            galeriaInner.append(item);
+            const titulo = document.createElement('div');
+            titulo.className = 'galeria-titulo';
+            titulo.textContent = imagen.titulo || '';
+            
+            item.appendChild(img);
+            if (imagen.titulo) item.appendChild(titulo);
+            galeriaInner.appendChild(item);
         });
         
-        $('.galeria-track').append(galeriaInner);
+        const galeriaTrack = document.querySelector('.galeria-track');
+        galeriaTrack.appendChild(galeriaInner);
         
-        // Configurar controles
         configurarControles();
-        
-        // Configurar eventos táctiles
-        configurarEventosTactiles();  
+        configurarEventosTactiles();
     }
     
     // Configurar controles de la galería
     function configurarControles() {
         // Botón de pausar/reanudar
-        $('#btn-pausar').click(function() {
-            pausado = !pausado;
-            $(this).text(pausado ? 'Reanudar' : 'Pausar');
-            
-            if (!pausado) {
-                iniciarAnimacion();
-            }
-        });
+        const btnPausar = document.getElementById('btn-pausar');
+        if (btnPausar) {
+            btnPausar.addEventListener('click', function() {
+                pausado = !pausado;
+                this.textContent = pausado ? 'Reanudar' : 'Pausar';
+                
+                if (!pausado) {
+                    iniciarAnimacion();
+                }
+            });
+        }
         
         // Cerrar galería
-        $('.cerrar-galeria').click(function() {
-            cerrarGaleria();
-        });
-    }   
+        const cerrarBtn = document.querySelector('.cerrar-galeria');
+        if (cerrarBtn) {
+            cerrarBtn.addEventListener('click', cerrarGaleria);
+        }
+    }
     
     // Configurar eventos táctiles para móvil
     function configurarEventosTactiles() {
-        const galeriaTrack = $('.galeria-track')[0];
+        const galeriaTrack = document.querySelector('.galeria-track');
+        if (!galeriaTrack) return;
         
         // Eventos para toque (móvil)
         galeriaTrack.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -159,35 +172,39 @@ $(document).ready(function() {
         galeriaTrack.addEventListener('mouseup', handleMouseUp);
         galeriaTrack.addEventListener('mouseleave', handleMouseLeave);
         
-        // Prevenir el comportamiento por defecto del arrastre en imágenes
-        $('.galeria-img').on('dragstart', function(e) {
-            e.preventDefault();
-        });
-        
-        // Permitir hacer zoom en imágenes con doble toque
-        $('.galeria-item').on('dblclick', function() {
-            $(this).toggleClass('zoom');
-        });
-        
-        // Para móvil: toque doble
-        let lastTouchEnd = 0;
-        $('.galeria-item').on('touchend', function(e) {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                // Doble toque detectado
-                $(this).toggleClass('zoom');
+        // Prevenir arrastre en imágenes
+        const galeriaImgs = document.querySelectorAll('.galeria-img');
+        galeriaImgs.forEach(img => {
+            img.addEventListener('dragstart', function(e) {
                 e.preventDefault();
-            }
-            lastTouchEnd = now;
+            });
+        });
+        
+        // Zoom con doble clic
+        const galeriaItems = document.querySelectorAll('.galeria-item');
+        galeriaItems.forEach(item => {
+            item.addEventListener('dblclick', function() {
+                this.classList.toggle('zoom');
+            });
+            
+            // Para móvil: toque doble
+            let lastTouchEnd = 0;
+            item.addEventListener('touchend', function(e) {
+                const now = Date.now();
+                if (now - lastTouchEnd <= 300) {
+                    this.classList.toggle('zoom');
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            });
         });
     }
     
-    // Manejadores de eventos táctiles
+    // Manejadores de eventos táctiles (ya están en JS nativo)
     function handleTouchStart(e) {
         if (!galeriaActiva) return;
         e.preventDefault();
         
-        // Detener animación automática temporalmente
         if (animacionId) {
             cancelAnimationFrame(animacionId);
             animacionId = null;
@@ -196,12 +213,10 @@ $(document).ready(function() {
         isDragging = true;
         startX = e.touches[0].clientX;
         currentX = startX;
-        
-        // Guardar el offset actual
         dragOffset = posicion;
         
-        // Añadir clase para feedback visual
-        $('.galeria-track').addClass('dragging');
+        const galeriaTrack = document.querySelector('.galeria-track');
+        galeriaTrack.classList.add('dragging');
     }
     
     function handleTouchMove(e) {
@@ -210,14 +225,10 @@ $(document).ready(function() {
         
         currentX = e.touches[0].clientX;
         const deltaX = currentX - startX;
-        
-        // Mover la galería según el desplazamiento táctil
         posicion = dragOffset + deltaX;
         
-        // Aplicar transformación inmediata
-        $('.galeria-inner').css('transform', `translateX(${posicion}px)`);
-        
-        // Calcular velocidad para el momentum (más sensible)
+        const galeriaInner = document.querySelector('.galeria-inner');
+        galeriaInner.style.transform = `translateX(${posicion}px)`;
         velocidadDespuesDeArrastre = deltaX / 5;
     }
     
@@ -226,18 +237,15 @@ $(document).ready(function() {
         e.preventDefault();
         
         isDragging = false;
-        $('.galeria-track').removeClass('dragging');
-        
-        // Aplicar momentum (inercia) al soltar
+        const galeriaTrack = document.querySelector('.galeria-track');
+        galeriaTrack.classList.remove('dragging');
         aplicarMomentum();
     }
     
-    // Manejadores de eventos de ratón (para escritorio también)
     function handleMouseDown(e) {
         if (!galeriaActiva) return;
         e.preventDefault();
         
-        // Detener animación automática temporalmente
         if (animacionId) {
             cancelAnimationFrame(animacionId);
             animacionId = null;
@@ -246,12 +254,11 @@ $(document).ready(function() {
         isDragging = true;
         startX = e.clientX;
         currentX = startX;
-        
-        // Guardar el offset actual
         dragOffset = posicion;
         
-        // Cambiar cursor y añadir clase para feedback visual
-        $('.galeria-track').css('cursor', 'grabbing').addClass('dragging');
+        const galeriaTrack = document.querySelector('.galeria-track');
+        galeriaTrack.style.cursor = 'grabbing';
+        galeriaTrack.classList.add('dragging');
     }
     
     function handleMouseMove(e) {
@@ -260,14 +267,10 @@ $(document).ready(function() {
         
         currentX = e.clientX;
         const deltaX = currentX - startX;
-        
-        // Mover la galería según el desplazamiento del ratón
         posicion = dragOffset + deltaX;
         
-        // Aplicar transformación inmediata
-        $('.galeria-inner').css('transform', `translateX(${posicion}px)`);
-        
-        // Calcular velocidad para el momentum
+        const galeriaInner = document.querySelector('.galeria-inner');
+        galeriaInner.style.transform = `translateX(${posicion}px)`;
         velocidadDespuesDeArrastre = deltaX / 8;
     }
     
@@ -275,11 +278,9 @@ $(document).ready(function() {
         if (!isDragging || !galeriaActiva) return;
         
         isDragging = false;
-        
-        // Restaurar cursor y remover clase
-        $('.galeria-track').css('cursor', 'grab').removeClass('dragging');
-        
-        // Aplicar momentum (inercia) al soltar
+        const galeriaTrack = document.querySelector('.galeria-track');
+        galeriaTrack.style.cursor = 'grab';
+        galeriaTrack.classList.remove('dragging');
         aplicarMomentum();
     }
     
@@ -289,102 +290,77 @@ $(document).ready(function() {
         }
     }
     
-    // Aplicar momentum (inercia) después de soltar
     function aplicarMomentum() {
-        // Aplicar momentum incluso con velocidad baja para mejor experiencia
         aplicarMomentumAnimacion(velocidadDespuesDeArrastre);
     }
     
-    // Animación de momentum
     function aplicarMomentumAnimacion(velocidadInicial) {
         let velocidadMomentum = velocidadInicial;
-        const deceleracion = 0.92; // Factor de deceleración (más suave)
+        const deceleracion = 0.92;
         
         function momentumStep() {
-            // Aplicar velocidad de momentum
             posicion += velocidadMomentum;
-            
-            // Reducir velocidad gradualmente
             velocidadMomentum *= deceleracion;
             
-            // Obtener el ancho total del contenido
-            const galeriaInner = $('.galeria-inner');
-            const anchoTotal = galeriaInner.width();
+            const galeriaInner = document.querySelector('.galeria-inner');
+            const anchoTotal = galeriaInner.offsetWidth;
             
-            // Si hemos recorrido todo el ancho, reiniciar posición
             if (Math.abs(posicion) >= anchoTotal / 2) {
                 posicion = 0;
             }
             
-            // Aplicar transformación
-            galeriaInner.css('transform', `translateX(${posicion}px)`);
+            galeriaInner.style.transform = `translateX(${posicion}px)`;
             
-            // Continuar momentum hasta que la velocidad sea muy baja
             if (Math.abs(velocidadMomentum) > 0.05) {
                 momentumId = requestAnimationFrame(momentumStep);
             } else {
-                // Cuando termine el momentum, reanudar animación automática
                 iniciarAnimacion();
             }
         }
         
-        // Iniciar animación de momentum
         momentumId = requestAnimationFrame(momentumStep);
     }
     
-    // Animar la galería automáticamente
     function animarGaleria() {
         if (pausado || isDragging) return;
         
-        const galeriaInner = $('.galeria-inner');
-        
-        // Mover las imágenes de derecha a izquierda
+        const galeriaInner = document.querySelector('.galeria-inner');
         posicion -= velocidad;
         
-        // Obtener el ancho total del contenido
-        const anchoTotal = galeriaInner.width();
-        
-        // Si hemos recorrido todo el ancho, reiniciar posición
+        const anchoTotal = galeriaInner.offsetWidth;
         if (Math.abs(posicion) >= anchoTotal / 2) {
             posicion = 0;
         }
         
-        // Aplicar transformación
-        galeriaInner.css('transform', `translateX(${posicion}px)`);
-        
-        // Continuar animación
+        galeriaInner.style.transform = `translateX(${posicion}px)`;
         animacionId = requestAnimationFrame(animarGaleria);
     }
     
-    // Iniciar animación
     function iniciarAnimacion() {
-        // Cancelar momentum si está activo
         if (momentumId) {
             cancelAnimationFrame(momentumId);
             momentumId = null;
         }
         
-        // Cancelar animación anterior si existe
         if (animacionId) {
             cancelAnimationFrame(animacionId);
         }
         
-        // Iniciar nueva animación
         animacionId = requestAnimationFrame(animarGaleria);
     }
     
     // Abrir galería
     function abrirGaleria() {
-        $('#galeria').addClass('activo');
+        const galeria = document.getElementById('galeria');
+        galeria.classList.add('activo');
         galeriaActiva = true;
         
-        // Establecer cursor inicial
-        $('.galeria-track').css('cursor', 'grab');
+        const galeriaTrack = document.querySelector('.galeria-track');
+        galeriaTrack.style.cursor = 'grab';
         
         // Disparar evento para reproducir audio
-        $(document).trigger('galeriaAbierta');
+        document.dispatchEvent(new CustomEvent('galeriaAbierta'));
         
-        // Iniciar animación después de un breve delay para que todo cargue
         setTimeout(() => {
             iniciarAnimacion();
         }, 100);
@@ -392,15 +368,16 @@ $(document).ready(function() {
     
     // Cerrar galería
     function cerrarGaleria() {
-        $('#galeria').removeClass('activo');
+        const galeria = document.getElementById('galeria');
+        galeria.classList.remove('activo');
         galeriaActiva = false;
         pausado = false;
-        $('#btn-pausar').text('Pausar');
         
-        // Restaurar velocidad base
+        const btnPausar = document.getElementById('btn-pausar');
+        if (btnPausar) btnPausar.textContent = 'Pausar';
+        
         velocidad = velocidadBase;
         
-        // Cancelar todas las animaciones
         if (animacionId) {
             cancelAnimationFrame(animacionId);
             animacionId = null;
@@ -412,38 +389,47 @@ $(document).ready(function() {
         }
         
         // Disparar evento para detener audio
-        $(document).trigger('galeriaCerrada');
+        document.dispatchEvent(new CustomEvent('galeriaCerrada'));
         
-        // Restaurar posición y remover zoom
         posicion = 0;
-        $('.galeria-inner').css('transform', 'translateX(0px)');
-        $('.galeria-item').removeClass('zoom');
+        const galeriaInner = document.querySelector('.galeria-inner');
+        galeriaInner.style.transform = 'translateX(0px)';
+        
+        const galeriaItems = document.querySelectorAll('.galeria-item');
+        galeriaItems.forEach(item => {
+            item.classList.remove('zoom');
+        });
     }
     
     // Configurar el corazón para abrir la galería
     function configurarCorazon() { 
-        // También el enlace invisible
-        $('.mostrar a').on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // Verificar que todo esté cargado antes de abrir
-            if (!$('#preloader').hasClass('hidden')) {
+        const mostrarLink = document.querySelector('.mostrar a');
+        if (mostrarLink) {
+            mostrarLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const preloader = document.getElementById('preloader');
+                if (preloader && !preloader.classList.contains('hidden')) {
+                    return false;
+                }
+                
+                console.log('Enlace clickeado');
+                abrirGaleria();
                 return false;
-            }
-            
-            console.log('Enlace clickeado');
-            abrirGaleria();
-            return false;
-        });
+            });
+        }
     }
     
-    // Inicializar cuando el documento esté listo
+    // Inicializar
     inicializarGaleria();
     configurarCorazon();
     
     // Asegurar que el video de fondo continúe
-    $('#bgVideo').on('pause', function() {
-        this.play();
-    });
+    const bgVideo = document.getElementById('bgVideo');
+    if (bgVideo) {
+        bgVideo.addEventListener('pause', function() {
+            this.play();
+        });
+    }
 });

@@ -1,43 +1,46 @@
-$(document).ready(function() {
-
-    window.imagenCargada = function() {
-        imagenesCargadas++;
-        console.log(`✅ Imagen ${imagenesCargadas}/${totalImagenes} cargada`);
-        actualizarProgreso();
-    };
-
-    let totalImagenes = 0;
+document.addEventListener('DOMContentLoaded', function() {
     let imagenesCargadas = 0;
     let audioCargado = false;
     let videoCargado = false;
     
-    // Elementos del preloader
-    const preloader = $('#preloader');
-    const loadingProgress = $('.loading-progress');
-    const cartaContainer = $('.cartaHecha');
+    const preloader = document.getElementById('preloader');
+    const loadingProgress = document.querySelector('.loading-progress');
+    const cartaContainer = document.querySelector('.cartaHecha');
     
-    // Función para actualizar progreso
+    window.imagenCargada = function() {
+        imagenesCargadas++;
+        actualizarProgreso();
+    };
+    
     function actualizarProgreso() {
-        const totalElementos = totalImagenes + 2; // +2 para video y audio
+        const totalImagenes = 44;
         const cargados = imagenesCargadas + (audioCargado ? 1 : 0) + (videoCargado ? 1 : 0);
-        const porcentaje = Math.round((cargados / totalElementos) * 100);
+        const porcentaje = Math.round((cargados / totalImagenes) * 100);
         
-        loadingProgress.text(`${porcentaje}%`);
+        // JavaScript nativo para actualizar texto
+        if (loadingProgress) {
+            loadingProgress.textContent = `${porcentaje}%`;
+        }
         
-        // Si todo está cargado, mostrar contenido
         if (porcentaje === 100) {
             setTimeout(() => {
-                preloader.addClass('hidden');
-                cartaContainer.removeClass('content-hidden').addClass('content-visible');
+                // JavaScript nativo para manejar clases
+                if (preloader) {
+                    preloader.classList.add('hidden');
+                }
                 
-                // Intentar reproducir video de fondo
+                if (cartaContainer) {
+                    cartaContainer.classList.remove('content-hidden');
+                    cartaContainer.classList.add('content-visible');
+                }
+                
                 const video = document.getElementById('bgVideo');
                 if (video) {
                     video.play().catch(e => {
-                        console.log("Autoplay bloqueado, se reproducirá con interacción del usuario");
+                        console.log("Dispositivo bloquea el video");
                     });
                 }
-            }, 800); // Pequeño delay para suavizar la transición
+            }, 800);
         }
     }
     
@@ -50,7 +53,7 @@ $(document).ready(function() {
         });
         
         video.addEventListener('error', function() {
-            videoCargado = true; // Marcar como cargado incluso si hay error
+            videoCargado = true;
             actualizarProgreso();
         });
     } else {
@@ -67,7 +70,7 @@ $(document).ready(function() {
         });
         
         audio.addEventListener('error', function() {
-            audioCargado = true; // Marcar como cargado incluso si hay error
+            audioCargado = true;
             actualizarProgreso();
         });
         
@@ -78,39 +81,13 @@ $(document).ready(function() {
         actualizarProgreso();
     }
     
-    // Contar imágenes que necesitan cargarse
-    function contarImagenes() {
-        // Imágenes en la galería
-        totalImagenes += 40; // Tus 40 imágenes de recuerdos
-        
-        // Imágenes de la carta (marca1 y marca2)
-        totalImagenes += 2;
-        
-        actualizarProgreso();
-    }
-    
-    // Función para registrar que una imagen se cargó
-    function imagenCargada() {
-        imagenesCargadas++;
-        actualizarProgreso();
-    }
-    
     function precargarImagenesGaleria() {
-        // Lista de TODAS las imágenes de la galería
-        const imagenesGaleria = [];
-        
-        // Generar rutas del 1 al 40
         for (let i = 1; i <= 40; i++) {
-            imagenesGaleria.push(`recuerdos/${i}.jpeg`);
-        }
-        
-        // Precargar cada una
-        imagenesGaleria.forEach(src => {
             const img = new Image();
-            img.onload = imagenCargada;
-            img.onerror = imagenCargada;
-            img.src = src;
-        });
+            img.onload = window.imagenCargada;
+            img.onerror = window.imagenCargada;
+            img.src = `recuerdos/${i}.jpeg`;
+        }
     }
 
     // Precargar imágenes de la carta
@@ -122,19 +99,17 @@ $(document).ready(function() {
         
         imagenesCarta.forEach(src => {
             const img = new Image();
-            img.onload = imagenCargada;
-            img.onerror = imagenCargada;
+            img.onload = window.imagenCargada;
+            img.onerror = window.imagenCargada;
             img.src = src;
         });
     }
     
-    // Inicializar contador y comenzar precarga
-    contarImagenes();
     precargarImagenesCarta();
     precargarImagenesGaleria();
     
-    // Reproducir audio de la galería cuando se abra
-    $(document).on('galeriaAbierta', function() {
+    // Eventos personalizados con JavaScript nativo
+    document.addEventListener('galeriaAbierta', function() {
         if (audio && audioCargado) {
             audio.currentTime = 0;
             audio.play().catch(e => {
@@ -142,9 +117,8 @@ $(document).ready(function() {
             });
         }
     });
-    
-    // Detener audio cuando se cierre la galería
-    $(document).on('galeriaCerrada', function() {
+
+    document.addEventListener('galeriaCerrada', function() {
         if (audio) {
             audio.pause();
             audio.currentTime = 0;
