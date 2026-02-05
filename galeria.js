@@ -162,9 +162,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!galeriaTrack) return;
         
         // Eventos para toque (móvil)
-        galeriaTrack.addEventListener('touchstart', handleTouchStart, { passive: false });
-        galeriaTrack.addEventListener('touchmove', handleTouchMove, { passive: false });
-        galeriaTrack.addEventListener('touchend', handleTouchEnd, { passive: false });
+        galeriaTrack.addEventListener('touchstart', handleTouchStart, { passive: true });
+        galeriaTrack.addEventListener('touchmove', handleTouchMove, { passive: true });
+        galeriaTrack.addEventListener('touchend', handleTouchEnd, { passive: true });
         
         // Eventos para ratón (escritorio)
         galeriaTrack.addEventListener('mousedown', handleMouseDown);
